@@ -137,4 +137,30 @@ public class EncryptionTest {
         assertEquals(decryptedText, textToEncrypt);
     }
 
+    @Test
+    public void test_builder_k() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+        EncryptionK encryption = new EncryptionK.Builder(
+                new byte[] { 29, 88, -79, -101, -108, -38, -126, 90, 52, 101, -35, 114, 12, -48, -66, -30 },
+                128,
+                Base64.DEFAULT,
+                65536,
+                "A beautiful salt",
+                "mor€Z€cr€tKYss",
+                "AES/CBC/PKCS5Padding",
+                "AES",
+                "UTF8",
+                "PBKDF2WithHmacSHA1",
+                "SHA1",
+                "SHA1PRNG",
+                null,
+                null
+        ).build();
+        assertNotNull(encryption);
+        String textToEncrypt = "A text to builder test.";
+        String encryptedText = encryption.encrypt(textToEncrypt);
+        assertNotNull(encryptedText);
+        String decryptedText = encryption.decrypt(encryptedText);
+        assertNotNull(decryptedText);
+        assertEquals(decryptedText, textToEncrypt);
+    }
 }
