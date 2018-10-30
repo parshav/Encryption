@@ -94,11 +94,11 @@ private constructor(
      * @return the encrypted String or `null` if you send the data as `null`
      */
     fun encryptOrNull(data: String): String? {
-        try {
-            return encrypt(data)
+        return try {
+            encrypt(data)
         } catch (e: Exception) {
             e.printStackTrace()
-            return null
+            null
         }
 
     }
@@ -112,19 +112,14 @@ private constructor(
      * @param data     the String to be encrypted
      * @param callback the Callback to handle the results
      */
-    fun encryptAsync(data: String, callback: Callback?) {
-        if (callback == null) return
+    fun encryptAsync(data: String, callback: (String?) -> (Unit)) {
         Thread(Runnable {
             try {
-                val encrypt = encrypt(data)
-                if (encrypt == null) {
-                    callback.onError(Exception("Encrypt return null, it normally occurs when you send a null data"))
-                }
-                callback.onSuccess(encrypt)
+                callback.invoke(encrypt(data))
             } catch (e: Exception) {
-                callback.onError(e)
+                callback.invoke(null)
             }
-        }).start()
+        })
     }
 
     /**
@@ -159,7 +154,14 @@ private constructor(
      * @throws IllegalStateException              if the cipher instance is not initialized for
      * encryption or decryption
      */
-    @Throws(UnsupportedEncodingException::class, NoSuchAlgorithmException::class, InvalidKeySpecException::class, NoSuchPaddingException::class, InvalidAlgorithmParameterException::class, InvalidKeyException::class, BadPaddingException::class, IllegalBlockSizeException::class)
+    @Throws(UnsupportedEncodingException::class,
+            NoSuchAlgorithmException::class,
+            InvalidKeySpecException::class,
+            NoSuchPaddingException::class,
+            InvalidAlgorithmParameterException::class,
+            InvalidKeyException::class,
+            BadPaddingException::class,
+            IllegalBlockSizeException::class)
     fun decrypt(data: String?): String? {
         if (data == null) return null
         val dataBytes = Base64.decode(data, mBuilder.mBase64Mode)
@@ -179,11 +181,11 @@ private constructor(
      * @return the decrypted String or `null` if you send the data as `null`
      */
     fun decryptOrNull(data: String): String? {
-        try {
-            return decrypt(data)
+        return try {
+            decrypt(data)
         } catch (e: Exception) {
             e.printStackTrace()
-            return null
+            null
         }
 
     }
@@ -197,17 +199,12 @@ private constructor(
      * @param data     the String to be decrypted
      * @param callback the Callback to handle the results
      */
-    fun decryptAsync(data: String, callback: Callback?) {
-        if (callback == null) return
+    fun decryptAsync(data: String, callback: (String?) -> (Unit)) {
         Thread(Runnable {
             try {
-                val decrypt = decrypt(data)
-                if (decrypt == null) {
-                    callback.onError(Exception("Decrypt return null, it normally occurs when you send a null data"))
-                }
-                callback.onSuccess(decrypt)
+                callback.invoke(decrypt(data))
             } catch (e: Exception) {
-                callback.onError(e)
+                callback.invoke(null)
             }
         }).start()
     }
@@ -226,7 +223,9 @@ private constructor(
      * generate a secret key
      * @throws NullPointerException         if the specified Builder secret key type is `null`
      */
-    @Throws(NoSuchAlgorithmException::class, UnsupportedEncodingException::class, InvalidKeySpecException::class)
+    @Throws(NoSuchAlgorithmException::class,
+            UnsupportedEncodingException::class,
+            InvalidKeySpecException::class)
     private fun getSecretKey(key: CharArray): SecretKey {
         val factory = SecretKeyFactory.getInstance(mBuilder.mSecretKeyType)
         val spec = PBEKeySpec(key, mBuilder.mSalt?.toByteArray(charset(mBuilder.mCharsetName!!)), mBuilder.mIterationCount, mBuilder.mKeyLength)
@@ -247,32 +246,12 @@ private constructor(
      * @throws NoSuchAlgorithmException     if the Builder digest algorithm is not available
      * @throws NullPointerException         if the Builder digest algorithm is `null`
      */
-    @Throws(UnsupportedEncodingException::class, NoSuchAlgorithmException::class)
+    @Throws(UnsupportedEncodingException::class,
+            NoSuchAlgorithmException::class)
     private fun hashTheKey(key: String): CharArray {
         val messageDigest = MessageDigest.getInstance(mBuilder.mDigestAlgorithm)
         messageDigest.update(key.toByteArray(charset(mBuilder.mCharsetName!!)))
         return Base64.encodeToString(messageDigest.digest(), Base64.NO_PADDING).toCharArray()
-    }
-
-    /**
-     * When you encrypt or decrypt in callback mode you get noticed of result using this interface
-     */
-    interface Callback {
-
-        /**
-         * Called when encrypt or decrypt job ends and the process was a success
-         *
-         * @param result the encrypted or decrypted String
-         */
-        fun onSuccess(result: String?)
-
-        /**
-         * Called when encrypt or decrypt job ends and has occurred an error in the process
-         *
-         * @param exception the Exception related to the error
-         */
-        fun onError(exception: Exception)
-
     }
 
     /**
