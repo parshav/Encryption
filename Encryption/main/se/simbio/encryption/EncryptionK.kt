@@ -162,10 +162,10 @@ private constructor(
     @Throws(UnsupportedEncodingException::class, NoSuchAlgorithmException::class, InvalidKeySpecException::class, NoSuchPaddingException::class, InvalidAlgorithmParameterException::class, InvalidKeyException::class, BadPaddingException::class, IllegalBlockSizeException::class)
     fun decrypt(data: String?): String? {
         if (data == null) return null
-        val dataBytes = Base64.decode(data, mBuilder.getBase64Mode())
-        val secretKey = getSecretKey(hashTheKey(mBuilder.mKey))
-        val cipher = Cipher.getInstance(mBuilder.getAlgorithm()!!)
-        cipher.init(Cipher.DECRYPT_MODE, secretKey, mBuilder.getIvParameterSpec(), mBuilder.getSecureRandom())
+        val dataBytes = Base64.decode(data, mBuilder.mBase64Mode)
+        val secretKey = mBuilder.mKey?.let { getSecretKey(hashTheKey(it)) } ?: return null
+        val cipher = Cipher.getInstance(mBuilder.mAlgorithm)
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, mBuilder.mIvParameterSpec, mBuilder.mSecureRandom)
         val dataBytesDecrypted = cipher.doFinal(dataBytes)
         return String(dataBytesDecrypted)
     }
@@ -228,10 +228,10 @@ private constructor(
      */
     @Throws(NoSuchAlgorithmException::class, UnsupportedEncodingException::class, InvalidKeySpecException::class)
     private fun getSecretKey(key: CharArray): SecretKey {
-        val factory = SecretKeyFactory.getInstance(mBuilder.getSecretKeyType())
-        val spec = PBEKeySpec(key, mBuilder.getSalt()!!.toByteArray(charset(mBuilder.getCharsetName())), mBuilder.getIterationCount(), mBuilder.getKeyLength())
+        val factory = SecretKeyFactory.getInstance(mBuilder.mSecretKeyType)
+        val spec = PBEKeySpec(key, mBuilder.mSalt?.toByteArray(charset(mBuilder.mCharsetName!!)), mBuilder.mIterationCount, mBuilder.mKeyLength)
         val tmp = factory.generateSecret(spec)
-        return SecretKeySpec(tmp.encoded, mBuilder.getKeyAlgorithm()!!)
+        return SecretKeySpec(tmp.encoded, mBuilder.mKeyAlgorithm)
     }
 
     /**
@@ -249,8 +249,8 @@ private constructor(
      */
     @Throws(UnsupportedEncodingException::class, NoSuchAlgorithmException::class)
     private fun hashTheKey(key: String): CharArray {
-        val messageDigest = MessageDigest.getInstance(mBuilder.getDigestAlgorithm())
-        messageDigest.update(key.toByteArray(charset(mBuilder.getCharsetName())))
+        val messageDigest = MessageDigest.getInstance(mBuilder.mDigestAlgorithm)
+        messageDigest.update(key.toByteArray(charset(mBuilder.mCharsetName!!)))
         return Base64.encodeToString(messageDigest.digest(), Base64.NO_PADDING).toCharArray()
     }
 
