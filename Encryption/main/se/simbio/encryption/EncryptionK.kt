@@ -22,16 +22,16 @@ import javax.crypto.spec.SecretKeySpec
 import third.part.android.util.Base64
 
 /**
- * A class to make more easy and simple the encrypt routines, this is the core of Encryption library
+ * A class to make more easy and simple the encrypt routines, this is the core of EncryptionK library
  */
-class Encryption
+class EncryptionK
 /**
- * The private and unique constructor, you should use the Encryption.Builder to build your own
+ * The private and unique constructor, you should use the EncryptionK.Builder to build your own
  * instance or get the default proving just the sensible information about encryption
  */
 private constructor(
         /**
-         * The Builder used to create the Encryption instance and that contains the information about
+         * The Builder used to create the EncryptionK instance and that contains the information about
          * encryption specifications, this instance need to be private and careful managed
          */
         private val mBuilder: Builder) {
@@ -276,30 +276,32 @@ private constructor(
     }
 
     /**
-     * This class is used to create an Encryption instance, you should provide ALL data or start
+     * This class is used to create an EncryptionK instance, you should provide ALL data or start
      * with the Default Builder provided by the getDefaultBuilder method
      */
-    class Builder {
+    data class Builder(
+            var mIv: ByteArray? = null,
+            var mKeyLength: Int = 0,
+            var mBase64Mode: Int = 0,
+            var mIterationCount: Int = 0,
+            var mSalt: String? = null,
+            var mKey: String? = null,
+            var mAlgorithm: String? = null,
+            var mKeyAlgorithm: String? = null,
+            var mCharsetName: String? = null,
+            var mSecretKeyType: String? = null,
+            var mDigestAlgorithm: String? = null,
+            var mSecureRandomAlgorithm: String? = null,
+            var mSecureRandom: SecureRandom? = null,
+            var mIvParameterSpec: IvParameterSpec? = null
+    ) {
 
-        var mIv: ByteArray? = null
-        var mKeyLength: Int = 0
-        var mBase64Mode: Int = 0
-        var mIterationCount: Int = 0
-        var mSalt: String? = null
-        var mKey: String? = null
-        var mAlgorithm: String? = null
-        var mKeyAlgorithm: String? = null
-        var mCharsetName: String? = null
-        var mSecretKeyType: String? = null
-        var mDigestAlgorithm: String? = null
-        var mSecureRandomAlgorithm: String? = null
-        var mSecureRandom: SecureRandom? = null
-        var mIvParameterSpec: IvParameterSpec? = null
 
-        fun build(): Encryption {
+
+        fun build(): EncryptionK {
             mSecureRandom = SecureRandom.getInstance(mSecureRandomAlgorithm)
             mIvParameterSpec = IvParameterSpec(mIv)
-            return Encryption(this)
+            return EncryptionK(this)
         }
 
         companion object {
@@ -340,9 +342,9 @@ private constructor(
 
         /**
          * @return an default encryption instance or `null` if occur some Exception, you can
-         * create yur own Encryption instance using the Encryption.Builder
+         * create yur own EncryptionK instance using the EncryptionK.Builder
          */
-        fun getDefault(key: String, salt: String, iv: ByteArray): Encryption? {
+        fun getDefault(key: String, salt: String, iv: ByteArray): EncryptionK? {
             return try {
                 Builder.getDefaultBuilder(key, salt, iv).build()
             } catch (e: NoSuchAlgorithmException) {
