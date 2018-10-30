@@ -78,11 +78,11 @@ private constructor(
             IllegalBlockSizeException::class)
     fun encrypt(data: String?): String? {
         if (data == null) return null
-        val secretKey = getSecretKey(hashTheKey(mBuilder.getKey()!!))
-        val dataBytes = data.toByteArray(charset(mBuilder.getCharsetName()))
-        val cipher = Cipher.getInstance(mBuilder.getAlgorithm()!!)
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey, mBuilder.getIvParameterSpec(), mBuilder.getSecureRandom())
-        return Base64.encodeToString(cipher.doFinal(dataBytes), mBuilder.getBase64Mode())
+        val secretKey = mBuilder.mKey?.let { getSecretKey(hashTheKey(it)) } ?: return null
+        val dataBytes = mBuilder.mCharsetName?.let { data.toByteArray(charset(it)) } ?: return null
+        val cipher = mBuilder.mAlgorithm?.let { Cipher.getInstance(it) } ?: return null
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey, mBuilder.mIvParameterSpec, mBuilder.mSecureRandom)
+        return Base64.encodeToString(cipher.doFinal(dataBytes), mBuilder.mBase64Mode)
     }
 
     /**
