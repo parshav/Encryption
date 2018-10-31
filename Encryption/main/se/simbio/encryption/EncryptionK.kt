@@ -68,14 +68,7 @@ private constructor(
      * @throws IllegalStateException              if the cipher instance is not initialized for
      * encryption or decryption
      */
-    @Throws(UnsupportedEncodingException::class,
-            NoSuchAlgorithmException::class,
-            NoSuchPaddingException::class,
-            InvalidAlgorithmParameterException::class,
-            InvalidKeyException::class,
-            InvalidKeySpecException::class,
-            BadPaddingException::class,
-            IllegalBlockSizeException::class)
+    @Throws(Exception::class)
     fun encrypt(data: String?): String? {
         if (data == null) return null
         val secretKey = mBuilder.mKey?.let { getSecretKey(hashTheKey(it)) } ?: return null
@@ -154,14 +147,6 @@ private constructor(
      * @throws IllegalStateException              if the cipher instance is not initialized for
      * encryption or decryption
      */
-    @Throws(UnsupportedEncodingException::class,
-            NoSuchAlgorithmException::class,
-            InvalidKeySpecException::class,
-            NoSuchPaddingException::class,
-            InvalidAlgorithmParameterException::class,
-            InvalidKeyException::class,
-            BadPaddingException::class,
-            IllegalBlockSizeException::class)
     fun decrypt(data: String?): String? {
         if (data == null) return null
         val dataBytes = Base64.decode(data, mBuilder.mBase64Mode)
@@ -223,9 +208,6 @@ private constructor(
      * generate a secret key
      * @throws NullPointerException         if the specified Builder secret key type is `null`
      */
-    @Throws(NoSuchAlgorithmException::class,
-            UnsupportedEncodingException::class,
-            InvalidKeySpecException::class)
     private fun getSecretKey(key: CharArray): SecretKey {
         val factory = SecretKeyFactory.getInstance(mBuilder.mSecretKeyType)
         val spec = PBEKeySpec(key, mBuilder.mSalt?.toByteArray(charset(mBuilder.mCharsetName!!)), mBuilder.mIterationCount, mBuilder.mKeyLength)
@@ -246,8 +228,6 @@ private constructor(
      * @throws NoSuchAlgorithmException     if the Builder digest algorithm is not available
      * @throws NullPointerException         if the Builder digest algorithm is `null`
      */
-    @Throws(UnsupportedEncodingException::class,
-            NoSuchAlgorithmException::class)
     private fun hashTheKey(key: String): CharArray {
         val messageDigest = MessageDigest.getInstance(mBuilder.mDigestAlgorithm)
         messageDigest.update(key.toByteArray(charset(mBuilder.mCharsetName!!)))
@@ -333,5 +313,4 @@ private constructor(
 
         }
     }
-
 }

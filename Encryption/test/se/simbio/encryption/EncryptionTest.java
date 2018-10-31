@@ -138,7 +138,7 @@ public class EncryptionTest {
     }
 
     @Test
-    public void test_builder_k() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+    public void test_builder_k() throws Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
         EncryptionK encryption = new EncryptionK.Builder(
                 new byte[] { 29, 88, -79, -101, -108, -38, -126, 90, 52, 101, -35, 114, 12, -48, -66, -30 },
                 128,
@@ -176,7 +176,7 @@ public class EncryptionTest {
     }
 
     @Test
-    public void test_default_k() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+    public void test_default_k() throws Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
         EncryptionK encryption = EncryptionK.Companion.getDefault("default_key","default_salt", new byte[16]);
         String textToEncrypt = "A text to default test.";
         String encryptedText = encryption.encrypt(textToEncrypt);
@@ -187,7 +187,7 @@ public class EncryptionTest {
     }
 
     @Test
-    public void test_default_k_j() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+    public void test_default_k_j() throws Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
         EncryptionK encryptionK = EncryptionK.Companion.getDefault("default_key","default_salt", new byte[16]);
         String textToEncryptK = "A text to default test.";
         String encryptedTextK = encryptionK.encrypt(textToEncryptK);
