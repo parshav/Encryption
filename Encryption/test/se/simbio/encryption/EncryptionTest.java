@@ -137,4 +137,66 @@ public class EncryptionTest {
         assertEquals(decryptedText, textToEncrypt);
     }
 
+    @Test
+    public void test_builder_k() throws Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+        EncryptionK encryption = new EncryptionK.Builder(
+                new byte[] { 29, 88, -79, -101, -108, -38, -126, 90, 52, 101, -35, 114, 12, -48, -66, -30 },
+                128,
+                Base64.DEFAULT,
+                65536,
+                "A beautiful salt",
+                "mor€Z€cr€tKYss",
+                "AES/CBC/PKCS5Padding",
+                "AES",
+                "UTF8",
+                "PBKDF2WithHmacSHA1",
+                "SHA1",
+                "SHA1PRNG",
+                null,
+                null
+        ).build();
+        assertNotNull(encryption);
+        String textToEncrypt = "A text to builder test.";
+        String encryptedText = encryption.encrypt(textToEncrypt);
+        assertNotNull(encryptedText);
+        String decryptedText = encryption.decrypt(encryptedText);
+        assertNotNull(decryptedText);
+        assertEquals(decryptedText, textToEncrypt);
+    }
+
+    @Test
+    public void test_default() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+        Encryption encryption = Encryption.getDefault("default_key","default_salt", new byte[16]);
+        String textToEncrypt = "A text to default test.";
+        String encryptedText = encryption.encrypt(textToEncrypt);
+        assertNotNull(encryptedText);
+        String decryptedText = encryption.decrypt(encryptedText);
+        assertNotNull(decryptedText);
+        assertEquals(decryptedText, textToEncrypt);
+    }
+
+    @Test
+    public void test_default_k() throws Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+        EncryptionK encryption = EncryptionK.Companion.getDefault("default_key","default_salt", new byte[16]);
+        String textToEncrypt = "A text to default test.";
+        String encryptedText = encryption.encrypt(textToEncrypt);
+        assertNotNull(encryptedText);
+        String decryptedText = encryption.decrypt(encryptedText);
+        assertNotNull(decryptedText);
+        assertEquals(decryptedText, textToEncrypt);
+    }
+
+    @Test
+    public void test_default_k_j() throws Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+        EncryptionK encryptionK = EncryptionK.Companion.getDefault("default_key","default_salt", new byte[16]);
+        String textToEncryptK = "A text to default test.";
+        String encryptedTextK = encryptionK.encrypt(textToEncryptK);
+
+        Encryption encryptionJ = Encryption.getDefault("default_key","default_salt", new byte[16]);
+        String textToEncryptJ = "A text to default test.";
+        String encryptedTextJ = encryptionJ.encrypt(textToEncryptJ);
+
+        assertEquals(encryptedTextK, encryptedTextJ);  // Test encrpyted test of both are the same
+        assertEquals(encryptionK.decrypt(encryptedTextJ), encryptionJ.decrypt(encryptedTextK)); // test decryption of k with j is the same with j using k
+    }
 }
