@@ -78,6 +78,20 @@ private constructor(
         return Base64.encodeToString(cipher.doFinal(dataBytes), mBuilder.mBase64Mode)
     }
 
+    fun encrypt(data: String, callback: (String?, Exception?) -> (Unit)) {
+        try {
+            val secretKey = mBuilder.mKey?.let { getSecretKey(hashTheKey(it)) }
+                    ?: throw (Exception("Null from Secret Key"))
+            val dataBytes = mBuilder.mCharsetName?.let { data.toByteArray(charset(it)) }
+                    ?: throw Exception("Null from charset name")
+            val cipher = mBuilder.mAlgorithm?.let { Cipher.getInstance(it) }
+                    ?: throw Exception("Cipher instance for Algorithm null")
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, mBuilder.mIvParameterSpec, mBuilder.mSecureRandom)
+            val encrypted = Base64.encodeToString(cipher.doFinal(dataBytes), mBuilder.mBase64Mode)
+            callback.invoke(encrypted, null)
+        } catch (e: Exception) { callback.invoke(null, e) }
+    }
+
     /**
      * This is a sugar method that calls encrypt method and catch the exceptions returning
      * `null` when it occurs and logging the error
@@ -147,14 +161,27 @@ private constructor(
      * @throws IllegalStateException              if the cipher instance is not initialized for
      * encryption or decryption
      */
-    fun decrypt(data: String?): String? {
-        if (data == null) return null
+    @Throws(Exception::class)
+    fun decrypt(data: String): String? {
         val dataBytes = Base64.decode(data, mBuilder.mBase64Mode)
         val secretKey = mBuilder.mKey?.let { getSecretKey(hashTheKey(it)) } ?: return null
         val cipher = Cipher.getInstance(mBuilder.mAlgorithm)
         cipher.init(Cipher.DECRYPT_MODE, secretKey, mBuilder.mIvParameterSpec, mBuilder.mSecureRandom)
         val dataBytesDecrypted = cipher.doFinal(dataBytes)
         return String(dataBytesDecrypted)
+    }
+
+    fun decrypt(data: String, callback: (String?, Exception?) -> (Unit)) {
+        try {
+            val dataBytes = Base64.decode(data, mBuilder.mBase64Mode)
+            val secretKey = mBuilder.mKey?.let { getSecretKey(hashTheKey(it)) } ?: throw Exception("Error getting secret key")
+            val cipher = Cipher.getInstance(mBuilder.mAlgorithm)
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, mBuilder.mIvParameterSpec, mBuilder.mSecureRandom)
+            val dataBytesDecrypted = cipher.doFinal(dataBytes)
+            callback.invoke(String(dataBytesDecrypted), null)
+        } catch (e: Exception) {
+            callback.invoke(null, e)
+        }
     }
 
     /**
@@ -303,14 +330,8 @@ private constructor(
          * @return an default encryption instance or `null` if occur some Exception, you can
          * create yur own EncryptionK instance using the EncryptionK.Builder
          */
-        fun getDefault(key: String, salt: String, iv: ByteArray): EncryptionK? {
-            return try {
-                Builder.getDefaultBuilder(key, salt, iv).build()
-            } catch (e: NoSuchAlgorithmException) {
-                e.printStackTrace()
-                null
-            }
-
+        fun getDefault(key: String, salt: String, iv: ByteArray): EncryptionK {
+            return Builder.getDefaultBuilder(key, salt, iv).build()
         }
     }
 }
